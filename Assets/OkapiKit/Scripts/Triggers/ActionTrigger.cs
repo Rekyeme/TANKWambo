@@ -1,10 +1,7 @@
 
-namespace OkapiKit
+[System.Serializable]
+public struct ActionTrigger
 {
-    [System.Serializable]
-    public struct ActionTrigger
-    {
-        public float delay;
-        public Action action;
-    }
+    public float    delay;
+    public Action   action;
 }

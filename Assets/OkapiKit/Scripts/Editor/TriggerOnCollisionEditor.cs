@@ -3,50 +3,47 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace OkapiKit.Editor
+[CustomEditor(typeof(TriggerOnCollision))]
+public class TriggerOnCollisionEditor : TriggerEditor
 {
-    [CustomEditor(typeof(TriggerOnCollision))]
-    public class TriggerOnCollisionEditor : TriggerEditor
+    SerializedProperty propIsTrigger;
+    SerializedProperty propEventType;
+    SerializedProperty propTags;
+
+    protected override void OnEnable()
     {
-        SerializedProperty propIsTrigger;
-        SerializedProperty propEventType;
-        SerializedProperty propTags;
+        base.OnEnable();
 
-        protected override void OnEnable()
+        propIsTrigger = serializedObject.FindProperty("isTrigger");
+        propEventType = serializedObject.FindProperty("eventType");
+        propTags = serializedObject.FindProperty("tags");
+    }
+
+    protected override Texture2D GetIcon()
+    {
+        var varTexture = GUIUtils.GetTexture("Collision");
+
+        return varTexture;
+    }
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        if (WriteTitle())
         {
-            base.OnEnable();
+            StdEditor(false);
 
-            propIsTrigger = serializedObject.FindProperty("isTrigger");
-            propEventType = serializedObject.FindProperty("eventType");
-            propTags = serializedObject.FindProperty("tags");
-        }
+            var trigger = (target as TriggerOnCollision);
+            if (trigger == null) return;
 
-        protected override Texture2D GetIcon()
-        {
-            var varTexture = GUIUtils.GetTexture("Collision");
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(propIsTrigger, new GUIContent("Collider Is Trigger?"));
+            EditorGUILayout.PropertyField(propEventType, new GUIContent("Event type"));
+            EditorGUILayout.PropertyField(propTags, new GUIContent("Tags"));
+            EditorGUI.EndChangeCheck();
 
-            return varTexture;
-        }
-
-        public override void OnInspectorGUI()
-        {
-            serializedObject.Update();
-
-            if (WriteTitle())
-            {
-                StdEditor(false);
-
-                var trigger = (target as TriggerOnCollision);
-                if (trigger == null) return;
-
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(propIsTrigger, new GUIContent("Collider Is Trigger?"));
-                EditorGUILayout.PropertyField(propEventType, new GUIContent("Event type"));
-                EditorGUILayout.PropertyField(propTags, new GUIContent("Tags"));
-                EditorGUI.EndChangeCheck();
-
-                ActionPanel();
-            }
+            ActionPanel();
         }
     }
 }

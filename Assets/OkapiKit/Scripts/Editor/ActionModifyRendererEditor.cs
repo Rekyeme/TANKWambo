@@ -1,49 +1,46 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace OkapiKit.Editor
+[CustomEditor(typeof(ActionModifyRenderer))]
+public class ActionModifyRendererEditor : ActionEditor
 {
-    [CustomEditor(typeof(ActionModifyRenderer))]
-    public class ActionModifyRendererEditor : ActionEditor
+    SerializedProperty propRenderer;
+    SerializedProperty propChangeType;
+    SerializedProperty propVisibility;
+
+    protected override void OnEnable()
     {
-        SerializedProperty propRenderer;
-        SerializedProperty propChangeType;
-        SerializedProperty propVisibility;
+        base.OnEnable();
 
-        protected override void OnEnable()
+        propRenderer = serializedObject.FindProperty("renderer");
+        propChangeType = serializedObject.FindProperty("changeType");
+        propVisibility = serializedObject.FindProperty("visibility");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        if (WriteTitle())
         {
-            base.OnEnable();
+            StdEditor(false);
 
-            propRenderer = serializedObject.FindProperty("renderer");
-            propChangeType = serializedObject.FindProperty("changeType");
-            propVisibility = serializedObject.FindProperty("visibility");
-        }
+            var action = (target as ActionModifyRenderer);
+            if (action == null) return;
 
-        public override void OnInspectorGUI()
-        {
-            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(propRenderer, new GUIContent("Renderer"));
+            EditorGUILayout.PropertyField(propChangeType, new GUIContent("Change Type"));
 
-            if (WriteTitle())
+            if (propChangeType.enumValueIndex == (int)ActionModifyRenderer.ChangeType.Visibility)
             {
-                StdEditor(false);
+                EditorGUILayout.PropertyField(propVisibility, new GUIContent("Visibility"));
+            }
 
-                var action = (target as ActionModifyRenderer);
-                if (action == null) return;
-
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(propRenderer, new GUIContent("Renderer"));
-                EditorGUILayout.PropertyField(propChangeType, new GUIContent("Change Type"));
-
-                if (propChangeType.enumValueIndex == (int)ActionModifyRenderer.ChangeType.Visibility)
-                {
-                    EditorGUILayout.PropertyField(propVisibility, new GUIContent("Visibility"));
-                }
-
-                if (EditorGUI.EndChangeCheck())
-                {
-                    serializedObject.ApplyModifiedProperties();
-                    (target as Action).UpdateExplanation();
-                }
+            if (EditorGUI.EndChangeCheck())
+            {
+                serializedObject.ApplyModifiedProperties();
+                (target as Action).UpdateExplanation();
             }
         }
     }

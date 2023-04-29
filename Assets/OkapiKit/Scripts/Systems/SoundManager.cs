@@ -3,91 +3,88 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace OkapiKit
+public class SoundManager : OkapiElement
 {
-    public class SoundManager : OkapiElement
+    public static SoundManager instance;
+
+    [SerializeField] private AudioMixerGroup    defaultMixerOutput;
+
+
+    List<AudioSource> audioSources = new List<AudioSource>();
+
+    // Start is called before the first frame update
+    void Start()
     {
-        public static SoundManager instance;
-
-        [SerializeField] private AudioMixerGroup defaultMixerOutput;
-
-
-        List<AudioSource> audioSources = new List<AudioSource>();
-
-        // Start is called before the first frame update
-        void Start()
+        if (instance == null)
         {
-            if (instance == null)
-            {
-                instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+            instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-
-        private void _PlaySound(AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
+        else
         {
-            var audioSource = GetSource();
-
-            audioSource.clip = clip;
-            audioSource.volume = volume;
-            audioSource.pitch = pitch;
-            audioSource.outputAudioMixerGroup = defaultMixerOutput;
-
-            audioSource.Play();
+            Destroy(gameObject);
         }
+    }
 
-        private AudioSource GetSource()
+    private void _PlaySound(AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
+    {
+        var audioSource = GetSource();
+
+        audioSource.clip = clip;
+        audioSource.volume = volume;
+        audioSource.pitch = pitch;
+        audioSource.outputAudioMixerGroup = defaultMixerOutput;
+
+        audioSource.Play();
+    }
+
+    private AudioSource GetSource()
+    {
+        if (audioSources == null)
         {
-            if (audioSources == null)
-            {
-                audioSources = new List<AudioSource>();
-                return NewSource();
-            }
-
-            foreach (var source in audioSources)
-            {
-                if (!source.isPlaying)
-                {
-                    return source;
-                }
-            }
-
+            audioSources = new List<AudioSource>();
             return NewSource();
         }
 
-        private AudioSource NewSource()
+        foreach (var source in audioSources)
         {
-            GameObject go = new GameObject();
-            go.name = "Audio Source";
-            go.transform.SetParent(transform);
-
-            var audioSource = go.AddComponent<AudioSource>();
-
-            audioSources.Add(audioSource);
-
-            return audioSource;
+            if (!source.isPlaying)
+            {
+                return source;
+            }
         }
 
-        static public void PlaySound(AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
-        {
-            instance._PlaySound(clip, volume, pitch);
-        }
+        return NewSource();
+    }
 
-        public override string GetRawDescription(string ident, GameObject refObject)
-        {
-            return "(UNUSED) SoundManager.GetRawDescription";
-        }
+    private AudioSource NewSource()
+    {
+        GameObject go = new GameObject();
+        go.name = "Audio Source";
+        go.transform.SetParent(transform);
 
-        public override string UpdateExplanation()
-        {
-            if (description != "") _explanation = description;
-            else _explanation = "";
+        var audioSource = go.AddComponent<AudioSource>();
 
-            return _explanation;
-        }
+        audioSources.Add(audioSource);
+
+        return audioSource;
+    }
+
+    static public void PlaySound(AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
+    {
+        instance._PlaySound(clip, volume, pitch);
+    }
+
+    public override string GetRawDescription(string ident, GameObject refObject)
+    {
+        return "(UNUSED) SoundManager.GetRawDescription";
+    }
+
+    public override string UpdateExplanation()
+    {
+        if (description != "") _explanation = description;
+        else _explanation = "";
+
+        return _explanation;
     }
 }

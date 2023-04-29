@@ -1,79 +1,78 @@
 using NaughtyAttributes;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-namespace OkapiKit
+abstract public class Movement : OkapiElement
 {
-    abstract public class Movement : OkapiElement
+    protected Rigidbody2D   rb;
+    protected Vector3       lastDelta;    
+
+    abstract public Vector2 GetSpeed();
+    abstract public void    SetSpeed(Vector2 speed);
+
+    virtual public bool     IsLinear() { return true; }
+
+    abstract public string GetTitle();
+
+    protected virtual void Start()
     {
-        protected Rigidbody2D rb;
-        protected Vector3 lastDelta;
+        rb = GetComponent<Rigidbody2D>();
+        UpdateExplanation();
+    }
 
-        abstract public Vector2 GetSpeed();
-        abstract public void SetSpeed(Vector2 speed);
-
-        virtual public bool IsLinear() { return true; }
-
-        abstract public string GetTitle();
-
-        protected virtual void Start()
+    protected void MoveDelta(Vector3 delta)
+    {
+        if (rb != null)
         {
-            rb = GetComponent<Rigidbody2D>();
-            UpdateExplanation();
+            rb.MovePosition(rb.position + new Vector2(delta.x, delta.y));
         }
-
-        protected void MoveDelta(Vector3 delta)
+        else
         {
-            if (rb != null)
-            {
-                rb.MovePosition(rb.position + new Vector2(delta.x, delta.y));
-            }
-            else
-            {
-                transform.position = transform.position + delta;
-            }
-            lastDelta = delta;
+            transform.position = transform.position + delta;
         }
+        lastDelta = delta;
+    }
 
-        protected void RotateZ(float angle)
+    protected void RotateZ(float angle)
+    {
+        if ((rb != null) && (!rb.freezeRotation))
         {
-            if ((rb != null) && (!rb.freezeRotation))
-            {
-                rb.MoveRotation(rb.rotation + angle);
-            }
-            else
-            {
-                transform.rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, angle);
-            }
+            rb.MoveRotation(rb.rotation + angle);
         }
-
-        protected void RotateTo(Vector2 upDir, float maxAngle)
+        else
         {
-            if ((rb != null) && (!rb.freezeRotation))
-            {
-                Quaternion target = Quaternion.LookRotation(Vector3.forward, upDir);
-
-                Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, target, maxAngle);
-
-                rb.MoveRotation(newRotation);
-            }
-            else
-            {
-                Quaternion target = Quaternion.LookRotation(Vector3.forward, upDir);
-
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, target, maxAngle);
-            }
+            transform.rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, angle);
         }
+    }
 
-        override public string UpdateExplanation()
+    protected void RotateTo(Vector2 upDir, float maxAngle)
+    {
+        if ((rb != null) && (!rb.freezeRotation))
         {
-            _explanation = "";
-            if (description != "") _explanation += description + "\n----------------\n";
+            Quaternion target = Quaternion.LookRotation(Vector3.forward, upDir);
 
-            _explanation += GetRawDescription("", gameObject);
+            Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, target, maxAngle);
 
-            return _explanation;
+            rb.MoveRotation(newRotation);
         }
+        else
+        {
+            Quaternion target = Quaternion.LookRotation(Vector3.forward, upDir);
+
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, target, maxAngle);
+        }
+    }
+
+    override public string UpdateExplanation()
+    {
+        _explanation = "";
+        if (description != "") _explanation += description + "\n----------------\n";
+
+        _explanation += GetRawDescription("", gameObject);
+
+        return _explanation;
     }
 }
